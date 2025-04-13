@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import {
+  refreshTokens,
   userLogin,
   userLogout,
   userRegister,
@@ -21,5 +22,5 @@ router.route('/register').post(
 
 router.route('/login').post(userLogin);
 router.route('/logout').post(verifyJWT, userLogout);
-
+router.route('/refresh').post(verifyJWT, refreshTokens);
 export default router;

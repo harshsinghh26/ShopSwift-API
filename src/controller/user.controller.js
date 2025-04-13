@@ -3,6 +3,7 @@ import { ApiError } from '../utils/ApiError.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { asyncHandler } from '../utils/AsyncHandler.js';
 import { uploadOnCloudinary } from '../utils/Cloudinary.js';
+import jwt from 'jsonwebtoken';
 
 // Generate Tokens
 
@@ -139,4 +140,55 @@ const userLogout = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, 'User Logged Out Successfully!!'));
 });
 
-export { userRegister, userLogin, userLogout };
+// Refresh Token
+
+const refreshTokens = asyncHandler(async (req, res) => {
+  const incomingToken = req.cookies.refreshToken || req.body.refreshToken;
+
+  if (!incomingToken) {
+    throw new ApiError(401, 'Unauthorize Request!!');
+  }
+
+  const decodedToken = jwt.verify(
+    incomingToken,
+    process.env.REFRESH_TOKEN_SECRET,
+  );
+
+  if (!decodedToken) {
+    throw new ApiError(401, 'Invalid Token');
+  }
+
+  const user = await User.findById(decodedToken._id);
+
+  if (!user) {
+    throw new ApiError(404, 'User not found!');
+  }
+
+  //   const { accessToken, newRefreshToken } = await generateTokens(user._id);
+
+  const { accessToken, refreshToken: newRefreshToken } = await generateTokens(
+    user._id,
+  );
+  //   console.log(newRefreshToken);
+
+  user.refreshToken = newRefreshToken;
+  user.save({ validateBeforeSave: false });
+
+  const options = {
+    httpOnly: false,
+    secure: true,
+  };
+
+  return res
+    .status(200)
+    .cookie('accessToken', accessToken, options)
+    .cookie('refreshToken', newRefreshToken, options)
+    .json(
+      new ApiResponse(
+        200,
+        { refreshToken: newRefreshToken, accessToken },
+        'Token Refreshed Successfully!!',
+      ),
+    );
+});
+export { userRegister, userLogin, userLogout, refreshTokens };
