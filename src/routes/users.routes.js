@@ -3,6 +3,7 @@ import {
   changeAvatar,
   changePassword,
   changeUserDetails,
+  getUser,
   refreshTokens,
   userLogin,
   userLogout,
@@ -27,6 +28,7 @@ router.route('/login').post(userLogin);
 router.route('/logout').post(verifyJWT, userLogout);
 router.route('/refresh').post(verifyJWT, refreshTokens);
 router.route('/change-password').put(verifyJWT, changePassword);
+router.route('/profile').get(verifyJWT, getUser);
 router.route('/change-details').patch(verifyJWT, changeUserDetails);
 router
   .route('/change-avatar')

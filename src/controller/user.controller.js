@@ -218,6 +218,15 @@ const changePassword = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, 'Password Changed SuccessFully!!'));
 });
 
+// Get User
+
+const getUser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user?._id).select('-password');
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, 'User fetched Successfully!!'));
+});
+
 // Change user Details
 
 const changeUserDetails = asyncHandler(async (req, res) => {
@@ -301,6 +310,7 @@ export {
   userLogout,
   refreshTokens,
   changePassword,
+  getUser,
   changeUserDetails,
   changeAvatar,
 };
