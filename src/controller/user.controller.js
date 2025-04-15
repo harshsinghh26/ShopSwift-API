@@ -4,6 +4,8 @@ import { ApiResponse } from '../utils/ApiResponse.js';
 import { asyncHandler } from '../utils/AsyncHandler.js';
 import { uploadOnCloudinary } from '../utils/Cloudinary.js';
 import jwt from 'jsonwebtoken';
+import { v2 as cloudinary } from 'cloudinary';
+import fs from 'fs';
 
 // Generate Tokens
 
@@ -194,7 +196,7 @@ const refreshTokens = asyncHandler(async (req, res) => {
 
 // Change User Password
 
-const chanegPassword = asyncHandler(async (req, res) => {
+const changePassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
 
   const user = await User.findById(req.user?._id);
@@ -215,4 +217,90 @@ const chanegPassword = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, {}, 'Password Changed SuccessFully!!'));
 });
-export { userRegister, userLogin, userLogout, refreshTokens, chanegPassword };
+
+// Change user Details
+
+const changeUserDetails = asyncHandler(async (req, res) => {
+  const { fullName, email, username } = req.body;
+
+  if (!(fullName || email || username)) {
+    throw new ApiError(400, 'All fields are required!!');
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: {
+        fullName,
+        username,
+        email,
+      },
+    },
+    { new: true },
+  );
+
+  const changedUser = await User.findById(user._id).select(
+    '-password -refreshToken',
+  );
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        changedUser,
+        'User details are changed Successfully!!',
+      ),
+    );
+});
+
+// Change User Avatar
+
+const changeAvatar = asyncHandler(async (req, res) => {
+  const userId = await User.findById(req.user?._id);
+
+  if (!userId) {
+    throw new ApiError(401, 'Unauthorized Access!!');
+  }
+
+  const avatarFilePath = req.file?.path;
+
+  if (!avatarFilePath) {
+    throw new ApiError(400, 'Avatar is required!!');
+  }
+
+  const avatar = await cloudinary.uploader.upload(avatarFilePath, {
+    public_id: userId?.avatarId,
+    overwrite: true,
+  });
+
+  fs.unlinkSync(avatarFilePath);
+
+  if (!avatar?.url) {
+    throw new ApiError(500, 'Something went wrong while uploading avatar!!');
+  }
+
+  const user = await User.findByIdAndUpdate(
+    userId._id,
+    {
+      $set: {
+        avatar: avatar.url,
+      },
+    },
+    { new: true },
+  ).select('-password');
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, 'Avatar Changed Successfully!!'));
+});
+
+export {
+  userRegister,
+  userLogin,
+  userLogout,
+  refreshTokens,
+  changePassword,
+  changeUserDetails,
+  changeAvatar,
+};

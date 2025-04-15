@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import {
-  chanegPassword,
+  changeAvatar,
+  changePassword,
+  changeUserDetails,
   refreshTokens,
   userLogin,
   userLogout,
@@ -24,5 +26,9 @@ router.route('/register').post(
 router.route('/login').post(userLogin);
 router.route('/logout').post(verifyJWT, userLogout);
 router.route('/refresh').post(verifyJWT, refreshTokens);
-router.route('/change-password').put(verifyJWT, chanegPassword);
+router.route('/change-password').put(verifyJWT, changePassword);
+router.route('/change-details').patch(verifyJWT, changeUserDetails);
+router
+  .route('/change-avatar')
+  .patch(upload.single('avatar'), verifyJWT, changeAvatar);
 export default router;
