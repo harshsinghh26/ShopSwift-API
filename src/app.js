@@ -22,4 +22,10 @@ import Userouter from './routes/users.routes.js';
 
 app.use('/api/v1/users', Userouter);
 
+// Import product Routes
+
+import productRouter from './routes/products.routes.js';
+
+app.use('/api/v1/products', productRouter);
+
 export default app;
