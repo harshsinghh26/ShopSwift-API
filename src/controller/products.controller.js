@@ -21,6 +21,14 @@ const createProduct = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'All Fields are Required!!');
   }
 
+  const existingProduct = await Product.findOne({
+    $and: [{ name }, { createdBy: req.user?._id }],
+  });
+
+  if (existingProduct) {
+    throw new ApiError(409, 'Product are already exist with this user!!');
+  }
+
   const imageFilePath = req.files?.image[0]?.path;
 
   if (!imageFilePath) {
