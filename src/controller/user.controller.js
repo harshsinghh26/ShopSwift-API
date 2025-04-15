@@ -191,4 +191,28 @@ const refreshTokens = asyncHandler(async (req, res) => {
       ),
     );
 });
-export { userRegister, userLogin, userLogout, refreshTokens };
+
+// Change User Password
+
+const chanegPassword = asyncHandler(async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+
+  const user = await User.findById(req.user?._id);
+  if (!user) {
+    throw new ApiError(401, 'Unauthorize Access!!');
+  }
+
+  const isPassword = await user.isPasswordCorrect(oldPassword);
+
+  if (!isPassword) {
+    throw new ApiError(401, 'Wrong old Password!!');
+  }
+
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: false });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, 'Password Changed SuccessFully!!'));
+});
+export { userRegister, userLogin, userLogout, refreshTokens, chanegPassword };
