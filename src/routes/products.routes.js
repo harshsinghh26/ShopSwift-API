@@ -1,6 +1,9 @@
 import { Router } from 'express';
 import { verifyJWT } from '../middlewares/auth.middlewares.js';
-import { createProduct } from '../controller/products.controller.js';
+import {
+  createProduct,
+  getProducts,
+} from '../controller/products.controller.js';
 import { upload } from '../middlewares/multer.middleware.js';
 
 const router = Router();
@@ -16,5 +19,7 @@ router.route('/create').post(
   verifyJWT,
   createProduct,
 );
+
+router.route('/get-products').get(verifyJWT, getProducts);
 
 export default router;

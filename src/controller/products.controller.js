@@ -60,4 +60,24 @@ const createProduct = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, product, 'Product Created Successsfully!!'));
 });
 
-export { createProduct };
+// Get All Products by user
+
+const getProducts = asyncHandler(async (req, res) => {
+  //   const user = await User.findById(req.user?._id);
+
+  const containUser = await Product.findOne({
+    createdBy: req.user?._id,
+  });
+
+  if (!containUser) {
+    throw new ApiError(401, 'Unauthorize Access!!');
+  }
+
+  const product = await Product.find({ createdBy: req.user?._id });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, product, 'Product fetched Successfully!!'));
+});
+
+export { createProduct, getProducts };
