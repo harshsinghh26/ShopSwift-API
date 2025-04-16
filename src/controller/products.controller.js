@@ -4,6 +4,8 @@ import { ApiError } from '../utils/ApiError.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { asyncHandler } from '../utils/AsyncHandler.js';
 import { uploadOnCloudinary } from '../utils/Cloudinary.js';
+import { v2 as cloudinary } from 'cloudinary';
+import fs from 'fs';
 
 const createProduct = asyncHandler(async (req, res) => {
   const { name, description, price, category, stock } = req.body;
@@ -98,4 +100,47 @@ const getProductById = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, product, 'Product for this Id has fetched!!'));
 });
 
-export { createProduct, getProducts, getProductById };
+// Update Products Details
+
+const updateProductDetails = asyncHandler(async (req, res) => {
+  const { name, description, stock, price, category } = req.body;
+  const { id } = req.params;
+
+  const containUser = await Product.findOne({
+    $and: [{ _id: id }, { createdBy: req.user?._id }],
+  });
+
+  if (!containUser) {
+    throw new ApiError(401, 'Unauthorize Access!!');
+  }
+
+  if (!(name || description || price || stock || category)) {
+    throw new ApiError(400, 'All fields are Required!!');
+  }
+
+  const changeProductDetails = await Product.findByIdAndUpdate(
+    id,
+    {
+      $set: {
+        name,
+        description,
+        stock,
+        price,
+        category,
+      },
+    },
+    { new: true },
+  );
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        changeProductDetails,
+        'User Detail changed Successfully!!',
+      ),
+    );
+});
+
+export { createProduct, getProducts, getProductById, updateProductDetails };

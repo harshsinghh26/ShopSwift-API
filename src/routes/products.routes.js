@@ -4,6 +4,7 @@ import {
   createProduct,
   getProductById,
   getProducts,
+  updateProductDetails,
 } from '../controller/products.controller.js';
 import { upload } from '../middlewares/multer.middleware.js';
 
@@ -23,5 +24,6 @@ router.route('/create').post(
 
 router.route('/get-products').get(verifyJWT, getProducts);
 router.route('/get-products/:id').get(verifyJWT, getProductById);
+router.route('/update/:id').patch(verifyJWT, updateProductDetails);
 
 export default router;
