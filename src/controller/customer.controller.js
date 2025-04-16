@@ -4,6 +4,22 @@ import { ApiResponse } from '../utils/ApiResponse.js';
 import { asyncHandler } from '../utils/AsyncHandler.js';
 import { uploadOnCloudinary } from '../utils/Cloudinary.js';
 
+// Generate Token
+
+const generateTokens = async (customerId) => {
+  try {
+    const customer = await Customer.findById(customerId);
+    const refreshToken = customer.generateAccessToken();
+    const accessToken = customer.generateRefreshToken();
+
+    customer.refreshToken = refreshToken;
+    await customer.save({ validateBeforeSave: false });
+    return { accessToken, refreshToken };
+  } catch (error) {
+    throw new ApiError(error?.code, `${error}`);
+  }
+};
+
 // Customer Register
 
 const customerRegister = asyncHandler(async (req, res) => {
@@ -54,4 +70,53 @@ const customerRegister = asyncHandler(async (req, res) => {
     );
 });
 
-export { customerRegister };
+// Login Customer
+
+const customerLogin = asyncHandler(async (req, res) => {
+  const { username, email, password } = req.body;
+
+  if (!(username || email)) {
+    throw new ApiError(400, 'Username or email is required!!');
+  }
+  const customer = await Customer.findOne({
+    $or: [{ email }, { username }],
+  });
+
+  if (!customer) {
+    throw new ApiError(404, 'Customer not Found!!');
+  }
+  const isPassword = await customer.isPasswordCorrect(password);
+
+  if (!isPassword) {
+    throw new ApiError(401, 'Wrong Password!!');
+  }
+
+  const { accessToken, refreshToken } = await generateTokens(customer._id);
+
+  const loggedInCustomer = await Customer.findById(customer._id).select(
+    '-password -refreshToken',
+  );
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  return res
+    .status(200)
+    .cookie('accessToken', accessToken, options)
+    .cookie('refreshToken', refreshToken, options)
+    .json(
+      new ApiResponse(
+        200,
+        {
+          customer: loggedInCustomer,
+          accessToken,
+          refreshToken,
+        },
+        'User logged In Successfully!!',
+      ),
+    );
+});
+
+export { customerRegister, customerLogin };
