@@ -1,0 +1,33 @@
+import jwt from 'jsonwebtoken';
+import { asyncHandler } from '../utils/AsyncHandler';
+import { ApiError } from '../utils/ApiError';
+import { Customer } from '../models/Customer.models';
+
+const verifyJWT = asyncHandler(async (req, res, next) => {
+  try {
+    const token =
+      req.cookies?.accessToken ||
+      req.header('Authorization')?.replace('Bearer ', '');
+
+    if (!token) {
+      throw new ApiError(401, 'Unauthorize Access!!');
+    }
+
+    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+
+    if (!decodedToken) {
+      throw new ApiError(401, 'Unauthorize Access!!');
+    }
+
+    const customer = await Customer.findById(decodedToken?._id).select(
+      '-password -refreshToken',
+    );
+
+    req.customer = customer;
+    next();
+  } catch (error) {
+    throw new ApiError(error?.code, `${error}`);
+  }
+});
+
+export { verifyJWT };
