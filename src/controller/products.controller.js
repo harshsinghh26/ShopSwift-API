@@ -189,10 +189,32 @@ const updateProductImage = asyncHandler(async (req, res) => {
     );
 });
 
+// Delete Product
+
+const deleteProduct = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const containUser = await Product.findOne({
+    $and: [{ _id: id }, { createdBy: req.user?._id }],
+  });
+
+  if (!containUser) {
+    throw new ApiError(401, 'Unauthorize Access!!');
+  }
+
+  await cloudinary.uploader.destroy(containUser?.imageId);
+  await Product.findByIdAndDelete(id);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, 'Product Deleted Successfully!!'));
+});
+
 export {
   createProduct,
   getProducts,
   getProductById,
   updateProductDetails,
   updateProductImage,
+  deleteProduct,
 };

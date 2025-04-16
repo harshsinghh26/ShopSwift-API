@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { verifyJWT } from '../middlewares/auth.middlewares.js';
 import {
   createProduct,
+  deleteProduct,
   getProductById,
   getProducts,
   updateProductDetails,
@@ -29,5 +30,6 @@ router.route('/update/:id').patch(verifyJWT, updateProductDetails);
 router
   .route('/update-image/:id')
   .patch(upload.single('image'), verifyJWT, updateProductImage);
+router.route('/delete/:id').delete(verifyJWT, deleteProduct);
 
 export default router;
