@@ -143,4 +143,56 @@ const updateProductDetails = asyncHandler(async (req, res) => {
     );
 });
 
-export { createProduct, getProducts, getProductById, updateProductDetails };
+// Change Product Image
+
+const updateProductImage = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const containUser = await Product.findOne({
+    $and: [{ _id: id }, { createdBy: req.user?._id }],
+  });
+
+  if (!containUser) {
+    throw new ApiError(401, 'Unauthorize Access!!');
+  }
+
+  const imageFilePath = req.file?.path;
+
+  if (!imageFilePath) {
+    throw new ApiError(400, 'Image of Product is required!!');
+  }
+
+  const image = await cloudinary.uploader.upload(imageFilePath, {
+    public_id: containUser?.imageId,
+    overwrite: true,
+  });
+  fs.unlinkSync(imageFilePath);
+
+  if (!image?.url) {
+    throw new ApiError(500, 'Something went wrong while uploading image!!');
+  }
+
+  const newImage = await Product.findByIdAndUpdate(
+    id,
+    {
+      $set: {
+        image: image.url,
+      },
+    },
+    { new: true },
+  );
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, newImage, 'Product Image changed Successfully!!'),
+    );
+});
+
+export {
+  createProduct,
+  getProducts,
+  getProductById,
+  updateProductDetails,
+  updateProductImage,
+};
