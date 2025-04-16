@@ -9,8 +9,8 @@ import { uploadOnCloudinary } from '../utils/Cloudinary.js';
 const generateTokens = async (customerId) => {
   try {
     const customer = await Customer.findById(customerId);
-    const refreshToken = customer.generateAccessToken();
-    const accessToken = customer.generateRefreshToken();
+    const accessToken = customer.generateAccessToken();
+    const refreshToken = customer.generateRefreshToken();
 
     customer.refreshToken = refreshToken;
     await customer.save({ validateBeforeSave: false });
@@ -119,4 +119,29 @@ const customerLogin = asyncHandler(async (req, res) => {
     );
 });
 
-export { customerRegister, customerLogin };
+// Customer Logout
+
+const customerLogout = asyncHandler(async (req, res) => {
+  await Customer.findByIdAndUpdate(
+    req.customer?._id,
+    {
+      $set: {
+        refreshToken: undefined,
+      },
+    },
+    { new: true },
+  );
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  return res
+    .status(200)
+    .clearCookie('accessToken', options)
+    .clearCookie('refreshToken', options)
+    .json(new ApiResponse(200, {}, 'User Logout Successfully!!'));
+});
+
+export { customerRegister, customerLogin, customerLogout };
