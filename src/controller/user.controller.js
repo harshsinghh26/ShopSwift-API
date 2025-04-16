@@ -23,6 +23,8 @@ const generateTokens = async (userId) => {
   }
 };
 
+// Register User
+
 const userRegister = asyncHandler(async (req, res) => {
   const { fullName, email, username, password } = req.body;
 

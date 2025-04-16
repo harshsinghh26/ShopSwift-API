@@ -28,4 +28,10 @@ import productRouter from './routes/products.routes.js';
 
 app.use('/api/v1/products', productRouter);
 
+// Import Customer Routes
+
+import customerRouter from './routes/customer.routes.js';
+
+app.use('/api/v1/customers', customerRouter);
+
 export default app;
