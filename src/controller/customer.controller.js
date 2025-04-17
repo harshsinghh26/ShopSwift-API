@@ -160,4 +160,35 @@ const getCustomer = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, customer, 'Customer Fetched Successfully!!'));
 });
 
-export { customerRegister, customerLogin, customerLogout, getCustomer };
+// change customer Password
+
+const changeCustomerPassword = asyncHandler(async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+
+  const customer = await Customer.findById(req.customer?._id);
+
+  if (!customer) {
+    throw new ApiError(401, 'Unauthorize Access!!');
+  }
+
+  const isPassword = await customer.isPasswordCorrect(oldPassword);
+
+  if (!isPassword) {
+    throw new ApiError(401, 'Wrong Old Password!!');
+  }
+
+  customer.password = newPassword;
+  await customer.save({ validateBeforeSave: false });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, 'Password Changed successfully!!'));
+});
+
+export {
+  customerRegister,
+  customerLogin,
+  customerLogout,
+  getCustomer,
+  changeCustomerPassword,
+};
