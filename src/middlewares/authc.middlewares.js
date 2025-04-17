@@ -26,7 +26,6 @@ const verifyJWT = asyncHandler(async (req, res, next) => {
     req.customer = customer;
     next();
   } catch (error) {
-    console.log(error);
     throw new ApiError(error?.code, `${error}`);
   }
 });

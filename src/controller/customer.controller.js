@@ -1,3 +1,4 @@
+import { response } from 'express';
 import { Customer } from '../models/Customer.models.js';
 import { ApiError } from '../utils/ApiError.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
@@ -144,4 +145,19 @@ const customerLogout = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, 'User Logout Successfully!!'));
 });
 
-export { customerRegister, customerLogin, customerLogout };
+// get Customer
+
+const getCustomer = asyncHandler(async (req, res) => {
+  const customer = await Customer.findById(req.customer?._id).select(
+    '-password -refreshToken',
+  );
+
+  if (!customer) {
+    throw new ApiError(401, 'Please login to find the customer!!');
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, customer, 'Customer Fetched Successfully!!'));
+});
+
+export { customerRegister, customerLogin, customerLogout, getCustomer };
