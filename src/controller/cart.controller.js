@@ -38,6 +38,7 @@ const getCart = asyncHandler(async (req, res) => {
 
   const cartItems = await Cart.find({ customer: customerId }).populate(
     'product',
+    'name',
   );
 
   if (!cartItems || cartItems.length === 0) {
