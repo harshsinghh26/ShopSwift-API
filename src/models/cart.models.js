@@ -2,11 +2,11 @@ import mongoose, { Schema } from 'mongoose';
 
 const cartSchema = new Schema(
   {
-    userId: {
+    customer: {
       type: Schema.Types.ObjectId,
       ref: 'Customer',
     },
-    productId: {
+    product: {
       type: Schema.Types.ObjectId,
       ref: 'Product',
     },
@@ -15,11 +15,13 @@ const cartSchema = new Schema(
       default: 0,
     },
     priceAtThatTime: {
-      type: Number,
+      type: Schema.Types.Number,
+      ref: 'Product',
       default: 0,
     },
   },
   { timestamps: true },
 );
 
+cartSchema.index({ customer: 1, product: 1 }, { unique: true });
 export const Cart = mongoose.model('Cart', cartSchema);

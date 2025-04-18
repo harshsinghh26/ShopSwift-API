@@ -34,4 +34,10 @@ import customerRouter from './routes/customer.routes.js';
 
 app.use('/api/v1/customers', customerRouter);
 
+// Import cart router
+
+import cartRouter from './routes/cart.routes.js';
+
+app.use('/api/v1/cart', cartRouter);
+
 export default app;
