@@ -63,4 +63,39 @@ const getCart = asyncHandler(async (req, res) => {
   );
 });
 
-export { addItemsInCart, getCart };
+// delete Items from cart
+
+const deleteItems = asyncHandler(async (req, res) => {
+  const customerId = req.customer?._id;
+  const { productId } = req.params;
+
+  // 1. Find the cart item
+  const cartItem = await Cart.findOne({
+    customer: customerId,
+    product: productId,
+  });
+  console.log(cartItem._id);
+
+  if (!cartItem) {
+    throw new ApiError(404, 'Item not found in cart!');
+  }
+
+  // 2. Check quantity
+  if (cartItem.quantity === 1) {
+    // delete the item completely
+    await Cart.deleteOne({ _id: cartItem._id });
+  } else {
+    // decrease quantity by 1
+    await Cart.findByIdAndUpdate(
+      cartItem._id,
+      { $inc: { quantity: -1 } },
+      { new: true },
+    );
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, 'Item removed successfully!'));
+});
+
+export { addItemsInCart, getCart, deleteItems };
