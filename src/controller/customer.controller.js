@@ -1,5 +1,5 @@
 import { response } from 'express';
-import { Customer } from '../models/Customer.models.js';
+import { Customer } from '../models/customer.models.js';
 import { ApiError } from '../utils/ApiError.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { asyncHandler } from '../utils/AsyncHandler.js';
