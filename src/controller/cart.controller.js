@@ -26,6 +26,12 @@ const addItemsInCart = asyncHandler(async (req, res) => {
     { new: true, upsert: true },
   );
 
+  await Product.findByIdAndUpdate(
+    product._id,
+    { $inc: { stock: -cartItem.quantity } },
+    { new: true },
+  );
+
   return res
     .status(200)
     .json(new ApiResponse(200, cartItem, 'Product added to cart!'));

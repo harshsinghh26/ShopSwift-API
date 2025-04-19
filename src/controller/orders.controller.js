@@ -21,10 +21,10 @@ const placeOrder = asyncHandler(async (req, res) => {
   }
 
   const order = await Order.create({
-    productId,
-    customerId,
+    product: productId,
+    customer: customerId,
     quantity,
-    priceAtThatTime: item.price,
+    totalPrice: quantity * item.priceAtThatTime,
   });
 
   if (item.quantity == 1) {
@@ -52,4 +52,35 @@ const placeOrder = asyncHandler(async (req, res) => {
     );
 });
 
-export { placeOrder };
+// Get order Details
+
+const getOrderDetails = asyncHandler(async (req, res) => {
+  const customerId = req.customer._id;
+
+  const orders = await Order.find({ customer: customerId }).populate(
+    'product',
+    'name',
+  );
+
+  if (!orders) {
+    throw new ApiError(400, 'There is no Orders!!');
+  }
+
+  let allOrderPrice = 0;
+
+  orders.forEach((items) => {
+    allOrderPrice += items.totalPrice;
+  });
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { items: orders, allOrderPrice },
+        'All orders Fetched',
+      ),
+    );
+});
+
+export { placeOrder, getOrderDetails };

@@ -14,7 +14,7 @@ const orderSchema = new Schema(
       type: Number,
       default: 0,
     },
-    priceAtThatTime: {
+    totalPrice: {
       type: Schema.Types.Number,
       ref: 'Product',
       default: 0,
