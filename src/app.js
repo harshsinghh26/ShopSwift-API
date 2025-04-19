@@ -40,4 +40,10 @@ import cartRouter from './routes/cart.routes.js';
 
 app.use('/api/v1/cart', cartRouter);
 
+// Import Order router
+
+import ordersRouter from './routes/orders.routes.js';
+
+app.use('/api/v1/orders', ordersRouter);
+
 export default app;

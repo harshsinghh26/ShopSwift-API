@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 
-const cartSchema = new Schema(
+const orderSchema = new Schema(
   {
     customer: {
       type: Schema.Types.ObjectId,
@@ -19,7 +19,9 @@ const cartSchema = new Schema(
       ref: 'Product',
       default: 0,
     },
+    expectedDeleviryDate: {
+      type: String,
+    },
   },
   { timestamps: true },
 );
-export const Cart = mongoose.model('Cart', cartSchema);
