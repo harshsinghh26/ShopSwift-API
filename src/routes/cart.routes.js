@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { verifyJWT } from '../middlewares/authc.middlewares.js';
+import { verifyJWTCustomer } from '../middlewares/authc.middlewares.js';
 import {
   addItemsInCart,
   deleteItems,
@@ -8,8 +8,8 @@ import {
 
 const router = Router();
 
-router.route('/add').post(verifyJWT, addItemsInCart);
-router.route('/get').get(verifyJWT, getCart);
-router.route('/delete/:productId').patch(verifyJWT, deleteItems);
+router.route('/add').post(verifyJWTCustomer, addItemsInCart);
+router.route('/get').get(verifyJWTCustomer, getCart);
+router.route('/delete/:productId').patch(verifyJWTCustomer, deleteItems);
 
 export default router;

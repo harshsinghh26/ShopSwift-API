@@ -7,7 +7,7 @@ import {
   getCustomer,
 } from '../controller/customer.controller.js';
 import { upload } from '../middlewares/multer.middleware.js';
-import { verifyJWT } from '../middlewares/authc.middlewares.js';
+import { verifyJWTCustomer } from '../middlewares/authc.middlewares.js';
 
 const router = Router();
 
@@ -22,8 +22,8 @@ router.route('/register').post(
 );
 
 router.route('/login').post(customerLogin);
-router.route('/logout').post(verifyJWT, customerLogout);
-router.route('/profile').get(verifyJWT, getCustomer);
-router.route('/change-password').put(verifyJWT, changeCustomerPassword);
+router.route('/logout').post(verifyJWTCustomer, customerLogout);
+router.route('/profile').get(verifyJWTCustomer, getCustomer);
+router.route('/change-password').put(verifyJWTCustomer, changeCustomerPassword);
 
 export default router;

@@ -1,5 +1,6 @@
 import { Cart } from '../models/cart.models.js';
 import { Order } from '../models/orders.models.js';
+import { Product } from '../models/products.models.js';
 import { ApiError } from '../utils/ApiError.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { asyncHandler } from '../utils/AsyncHandler.js';
@@ -19,10 +20,12 @@ const placeOrder = asyncHandler(async (req, res) => {
       'Item not found in cart, Please add it in your cart first!!',
     );
   }
+  const user = await Product.findById(productId);
 
   const order = await Order.create({
     product: productId,
     customer: customerId,
+    admin: user.createdBy,
     quantity,
     totalPrice: quantity * item.priceAtThatTime,
   });
@@ -52,7 +55,7 @@ const placeOrder = asyncHandler(async (req, res) => {
     );
 });
 
-// Get order Details
+// Get order Details for customer
 
 const getOrderDetails = asyncHandler(async (req, res) => {
   const customerId = req.customer._id;
@@ -83,4 +86,26 @@ const getOrderDetails = asyncHandler(async (req, res) => {
     );
 });
 
-export { placeOrder, getOrderDetails };
+// Get all Orders which the admin have
+
+const getAllOrders = asyncHandler(async (req, res) => {
+  const userId = req.user?._id;
+
+  if (!userId) {
+    throw new ApiError(401, 'You are not Admin!!');
+  }
+
+  const orders = await Order.find({ admin: userId });
+
+  if (!orders) {
+    throw new ApiError(404, 'No Order are there');
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, orders, 'All Orders are Fetched Successfully!!'),
+    );
+});
+
+export { placeOrder, getOrderDetails, getAllOrders };

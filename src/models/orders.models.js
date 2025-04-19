@@ -10,6 +10,10 @@ const orderSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'Product',
     },
+    admin: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    },
     quantity: {
       type: Number,
       default: 0,
