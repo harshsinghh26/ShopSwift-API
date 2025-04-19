@@ -19,9 +19,8 @@ const orderSchema = new Schema(
       ref: 'Product',
       default: 0,
     },
-    expectedDeleviryDate: {
-      type: String,
-    },
   },
   { timestamps: true },
 );
+
+export const Order = mongoose.model('Order', orderSchema);
