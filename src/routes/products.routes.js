@@ -3,6 +3,7 @@ import { verifyJWT } from '../middlewares/auth.middlewares.js';
 import {
   createProduct,
   deleteProduct,
+  getAllProducts,
   getProductById,
   getProducts,
   updateProductDetails,
@@ -31,5 +32,6 @@ router
   .route('/update-image/:id')
   .patch(upload.single('image'), verifyJWT, updateProductImage);
 router.route('/delete/:id').delete(verifyJWT, deleteProduct);
+router.route('/').get(getAllProducts);
 
 export default router;

@@ -210,6 +210,67 @@ const deleteProduct = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, 'Product Deleted Successfully!!'));
 });
 
+// Searching and filtering the product also sorting it
+
+const getAllProducts = asyncHandler(async (req, res) => {
+  const {
+    search,
+    category,
+    minPrice,
+    maxPrice,
+    sort,
+    page = 1,
+    limit = 3,
+  } = req.query;
+
+  const query = {};
+
+  if (search) {
+    query.$or = [
+      { name: { $regex: search, $options: 'i' } },
+      { description: { $regex: search, $options: 'i' } },
+    ];
+  }
+
+  if (category) {
+    query.category = category;
+  }
+
+  if (minPrice || maxPrice) {
+    query.price = {};
+    if (minPrice) query.price.$gte = Number(minPrice);
+    if (maxPrice) query.price.$lte = Number(maxPrice);
+  }
+
+  const skip = Number(page - 1) * Number(limit);
+
+  let sortOption = {};
+  if (sort === 'price') sortOption.price = 1;
+  else if (sort === '-price') sortOption.price = -1;
+  else if (sort === 'newest') sortOption.createdAt = -1;
+
+  const products = await Product.find(query)
+    .sort(sortOption)
+    .skip(skip)
+    .limit(limit);
+
+  const total = await Product.countDocuments(query);
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        total,
+        currentPage: Number(page),
+        totalPages: Math.ceil(total / Number(limit)),
+        count: products.length,
+        products,
+      },
+      'Products fetched successfully',
+    ),
+  );
+});
+
 export {
   createProduct,
   getProducts,
@@ -217,4 +278,5 @@ export {
   updateProductDetails,
   updateProductImage,
   deleteProduct,
+  getAllProducts,
 };
