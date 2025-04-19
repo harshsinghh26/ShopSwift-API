@@ -20,22 +20,6 @@ and order placement. Designed with scalability and maintainability in mind, this
 
 ---
 
-## 📁 Project Structure
-
-├── controllers/
-├── db/
-├── middlewares/
-├── models/
-├── routes/
-├── utils/
-├── app.js
-├── constant.js
-├── index.js
-├── .env
-└── README.md
-
----
-
 ## ⚙️ Tech Stack
 
 - **Backend:** Node.js, Express.js
