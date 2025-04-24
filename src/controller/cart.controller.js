@@ -102,4 +102,6 @@ const deleteItems = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, 'Item removed successfully!'));
 });
 
+// get all
+
 export { addItemsInCart, getCart, deleteItems };
