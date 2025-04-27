@@ -1,9 +1,9 @@
-import { response } from 'express';
 import { Customer } from '../models/customer.models.js';
 import { ApiError } from '../utils/ApiError.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { asyncHandler } from '../utils/AsyncHandler.js';
 import { uploadOnCloudinary } from '../utils/Cloudinary.js';
+import jwt from 'jsonwebtoken';
 
 // Generate Token
 
@@ -185,10 +185,60 @@ const changeCustomerPassword = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, 'Password Changed successfully!!'));
 });
 
+// refresh Token
+
+const refreshTokens = asyncHandler(async (req, res) => {
+  const incomingToken = req.cookies.refreshToken || req.body.refreshToken;
+  console.log(req.cookies.refreshToken);
+
+  if (!incomingToken) {
+    throw new ApiError(401, 'Unauthorized Request!!');
+  }
+
+  const decodedToken = jwt.verify(
+    incomingToken,
+    process.env.REFRESH_TOKEN_SECRET,
+  );
+
+  if (!decodedToken) {
+    throw new ApiError(401, 'Invalid Token');
+  }
+
+  const customer = await Customer.findById(decodedToken._id);
+
+  if (!customer) {
+    throw new ApiError(404, 'User not found!');
+  }
+
+  const { accessToken, refreshToken: newRefreshToken } = await generateTokens(
+    customer._id,
+  );
+
+  customer.refreshToken = newRefreshToken;
+  await customer.save({ validateBeforeSave: false });
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  return res
+    .status(200)
+    .cookie('accessToken', accessToken, options)
+    .cookie('refreshToken', newRefreshToken, options)
+    .json(
+      new ApiResponse(
+        200,
+        { refreshToken: newRefreshToken, accessToken },
+        'Token Refreshed Successfully!!',
+      ),
+    );
+});
 export {
   customerRegister,
   customerLogin,
   customerLogout,
   getCustomer,
   changeCustomerPassword,
+  refreshTokens,
 };

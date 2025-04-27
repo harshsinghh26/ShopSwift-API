@@ -176,10 +176,10 @@ const refreshTokens = asyncHandler(async (req, res) => {
   //   console.log(newRefreshToken);
 
   user.refreshToken = newRefreshToken;
-  user.save({ validateBeforeSave: false });
+  await user.save({ validateBeforeSave: false });
 
   const options = {
-    httpOnly: false,
+    httpOnly: true,
     secure: true,
   };
 
